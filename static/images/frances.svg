@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="sky-fr" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#039be5"/>
+      <stop offset="60%" stop-color="#81d4fa"/>
+      <stop offset="100%" stop-color="#e1f5fe"/>
+    </linearGradient>
+    <linearGradient id="calm-sea" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#00e5ff"/>
+      <stop offset="50%" stop-color="#00b0ff"/>
+      <stop offset="100%" stop-color="#0288d1"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="260" fill="url(#sky-fr)"/>
+  <circle cx="150" cy="90" r="45" fill="#fff9c4" opacity="0.9"/>
+  <!-- Mar calmo e mar com ondas -->
+  <rect y="240" width="800" height="260" fill="url(#calm-sea)"/>
+  <!-- Barreira de recifes de corais que protege a praia -->
+  <path d="M 0 320 Q 200 310 400 325 T 800 315 L 800 360 Q 400 370 0 355 Z" fill="#37474f" opacity="0.9"/>
+  <!-- Espumas brancas nas pedras -->
+  <path d="M 0 320 Q 100 310 200 325 T 400 320 T 600 325 T 800 315" stroke="#ffffff" stroke-width="5" fill="none" opacity="0.8"/>
+  <!-- Mar piscina natural no lado esquerdo -->
+  <rect y="360" width="450" height="140" fill="#00e676" opacity="0.2"/>
+  <!-- Prancha de surf estilizada no lado direito (mar aberto) -->
+  <g transform="translate(620, 360) rotate(-25)">
+    <ellipse cx="0" cy="0" rx="45" ry="14" fill="#ff3d00"/>
+    <line x1="-40" y1="0" x2="40" y2="0" stroke="#ffffff" stroke-width="3"/>
+  </g>
+  <rect x="20" y="20" width="220" height="40" rx="8" fill="#006064" opacity="0.8"/>
+  <text x="35" y="46" font-family="'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="bold" fill="#ffffff">Praia do Francês</text>
+</svg>

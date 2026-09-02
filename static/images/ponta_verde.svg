@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="sky-pv" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0288d1"/>
+      <stop offset="60%" stop-color="#4fc3f7"/>
+      <stop offset="100%" stop-color="#e1f5fe"/>
+    </linearGradient>
+    <linearGradient id="sea-pv" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00acc1"/>
+      <stop offset="70%" stop-color="#00838f"/>
+      <stop offset="100%" stop-color="#004d40"/>
+    </linearGradient>
+    <linearGradient id="reef" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#546e7a"/>
+      <stop offset="100%" stop-color="#37474f"/>
+    </linearGradient>
+  </defs>
+  <!-- Céu de Alagoas -->
+  <rect width="800" height="280" fill="url(#sky-pv)"/>
+  <circle cx="200" cy="90" r="45" fill="#fff59d" opacity="0.9"/>
+  <!-- Mar da Ponta Verde -->
+  <rect y="260" width="800" height="240" fill="url(#sea-pv)"/>
+  <!-- Bancada de Recifes/Corais na maré baixa -->
+  <path d="M 280 340 Q 360 330 460 335 Q 560 340 640 330 Q 720 345 780 335 L 790 380 Q 550 400 300 380 Z" fill="url(#reef)"/>
+  <ellipse cx="500" cy="355" rx="160" ry="25" fill="#455a64"/>
+  <!-- Farol da Ponta Verde -->
+  <g transform="translate(480, 130)">
+    <!-- Base de pedra/concreto -->
+    <rect x="-35" y="210" width="70" height="20" fill="#263238" rx="4"/>
+    <polygon points="-25,210 25,210 18,30 -18,30" fill="#ffffff"/>
+    <!-- Listras Vermelhas do Farol -->
+    <polygon points="-23,175 23,175 21,145 -21,145" fill="#d32f2f"/>
+    <polygon points="-20,115 20,115 19,85 -19,85" fill="#d32f2f"/>
+    <!-- Cúpula do Farol e Lanterna -->
+    <rect x="-18" y="15" width="36" height="15" fill="#cfd8dc"/>
+    <rect x="-14" y="5" width="28" height="10" fill="#ffeb3b" opacity="0.85"/>
+    <path d="M -16 5 Q 0 -12 16 5 Z" fill="#c62828"/>
+    <!-- Balcão e grade -->
+    <line x1="-22" y1="28" x2="22" y2="28" stroke="#37474f" stroke-width="3"/>
+    <!-- Feixe suave de luz -->
+    <polygon points="12,10 260,-40 280,-10 12,12" fill="#fff9c4" opacity="0.2"/>
+  </g>
+  <!-- Faixa litorânea com coqueiros -->
+  <g transform="translate(60, 200)">
+    <!-- Coqueiro esquerdo -->
+    <path d="M 20 280 Q 70 150 120 80" stroke="#6d4c41" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <path d="M 120 80 Q 80 50 30 70" stroke="#2e7d32" stroke-width="7" fill="none"/>
+    <path d="M 120 80 Q 110 30 90 0" stroke="#388e3c" stroke-width="7" fill="none"/>
+    <path d="M 120 80 Q 150 30 180 40" stroke="#43a047" stroke-width="7" fill="none"/>
+    <path d="M 120 80 Q 170 80 190 110" stroke="#2e7d32" stroke-width="7" fill="none"/>
+  </g>
+  <rect x="20" y="20" width="230" height="40" rx="8" fill="#00363a" opacity="0.75"/>
+  <text x="35" y="46" font-family="'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="bold" fill="#ffffff">Farol da Ponta Verde</text>
+</svg>

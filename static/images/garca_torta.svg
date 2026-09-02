@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="sky-gt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3949ab"/>
+      <stop offset="50%" stop-color="#5c6bc0"/>
+      <stop offset="100%" stop-color="#ffccbc"/>
+    </linearGradient>
+    <linearGradient id="sea-gt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00897b"/>
+      <stop offset="100%" stop-color="#004d40"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="280" fill="url(#sky-gt)"/>
+  <circle cx="680" cy="120" r="45" fill="#ffe0b2" opacity="0.9"/>
+  <!-- Mar e enseada pacífica -->
+  <rect y="260" width="800" height="150" fill="url(#sea-gt)"/>
+  <!-- Faixa de areia úmida e restinga -->
+  <path d="M 0 380 Q 400 350 800 375 L 800 500 L 0 500 Z" fill="#d7ccc8"/>
+  <!-- Barco de pesca artesanal ancorado na areia -->
+  <g transform="translate(240, 340)">
+    <path d="M 20 50 L 140 50 L 125 75 L 35 75 Z" fill="#0277bd"/>
+    <path d="M 20 50 L 140 50 L 140 58 L 20 58 Z" fill="#d32f2f"/>
+    <rect x="75" y="25" width="4" height="25" fill="#3e2723"/>
+    <polygon points="79,28 110,45 79,48" fill="#ffffff" opacity="0.9"/>
+  </g>
+  <!-- Silhueta da Garça graciosa voando -->
+  <g transform="translate(480, 100) scale(0.7)">
+    <path d="M 0 20 Q 30 -10 60 10 Q 90 -10 120 20 Q 70 5 0 20 Z" fill="#ffffff" opacity="0.95"/>
+  </g>
+  <g transform="translate(560, 70) scale(0.5)">
+    <path d="M 0 20 Q 30 -10 60 10 Q 90 -10 120 20 Q 70 5 0 20 Z" fill="#ffffff" opacity="0.9"/>
+  </g>
+  <!-- Coqueiros inclinados pela brisa marítima -->
+  <g transform="translate(720, 200)">
+    <path d="M 40 280 Q -10 140 -30 40" stroke="#4e342e" stroke-width="12" fill="none" stroke-linecap="round"/>
+    <path d="M -30 40 Q -80 20 -110 50" stroke="#1b5e20" stroke-width="6" fill="none"/>
+    <path d="M -30 40 Q -60 -10 -70 -40" stroke="#2e7d32" stroke-width="6" fill="none"/>
+    <path d="M -30 40 Q -10 -20 10 -40" stroke="#388e3c" stroke-width="6" fill="none"/>
+  </g>
+  <rect x="20" y="20" width="220" height="40" rx="8" fill="#1a237e" opacity="0.8"/>
+  <text x="35" y="46" font-family="'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="bold" fill="#ffffff">Praia de Garça Torta</text>
+</svg>
