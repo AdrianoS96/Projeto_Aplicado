@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Autenticação Segura | Maceió Turismo{% endblock %}
+
+{% block content %}
+<div class="container auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-icon-badge">🔒</div>
+      <h2 class="auth-title">Acesso Restrito</h2>
+      <p class="auth-subtitle">Área de curadoria e gestão de pontos turísticos de Maceió</p>
+    </div>
+
+    <form action="{{ url_for('login') }}" method="POST" class="auth-form" novalidate>
+      <!-- Token Anti-CSRF Obrigatório (Mitigação Cross-Site Request Forgery) -->
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      <div class="form-group">
+        <label for="username" class="form-label">Nome de Usuário</label>
+        <div class="input-wrapper">
+          <span class="input-icon">👤</span>
+          <input 
+            type="text" 
+            id="username" 
+            name="username" 
+            class="form-control" 
+            placeholder="Ex: admin" 
+            required 
+            autocomplete="username"
+            maxlength="80"
+            autofocus
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">Senha de Acesso</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔑</span>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            class="form-control" 
+            placeholder="••••••••••••" 
+            required 
+            autocomplete="current-password"
+            maxlength="128"
+          >
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-block btn-lg">
+          <span>Autenticar com Segurança</span> 🛡️
+        </button>
+      </div>
+    </form>
+
+    <!-- Caixa Informativa de Defesas Ativas (Secure by Design) -->
+    <div class="security-info-box">
+      <div class="security-info-header">
+        <span class="shield-mini">🛡️</span>
+        <strong>Proteções Ativas nesta Tela:</strong>
+      </div>
+      <ul class="security-checklist">
+        <li><strong>OWASP A01</strong>: Sessão isolada e protegida no servidor.</li>
+        <li><strong>OWASP A03</strong>: Consultas SQL 100% parametrizadas (Prepared Statements).</li>
+        <li><strong>OWASP A07</strong>: Senha armazenada com hash criptográfico (scrypt) e proteção de taxa (Rate Limiting) contra força bruta.</li>
+        <li><strong>Anti-CSRF</strong>: Validação estrita de token de sessão em cada requisição POST.</li>
+      </ul>
+      <div class="credentials-tip">
+        <span>💡 <strong>Credenciais de Avaliação:</strong> Usuário <code>admin</code> | Senha <code>DefinaSuaSenhaSegura2025!</code></span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

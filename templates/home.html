@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Maceió Turismo | Pontos Turísticos do Paraíso das Águas{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container hero-container">
+    <div class="hero-text">
+      <span class="hero-badge">🌴 Capital do Sol e das Águas Esmeraldas</span>
+      <h1 class="hero-title">Descubra os Encantos e Cores de Maceió</h1>
+      <p class="hero-subtitle">
+        Conheça as praias paradisíacas, recifes de corais, piscinas naturais e o riquíssimo patrimônio histórico e cultural de Alagoas.
+        Curadoria oficial com dados verificados de órgãos municipais e estaduais de turismo.
+      </p>
+      <div class="hero-actions">
+        <a href="#pontos" class="btn btn-primary btn-lg">Explorar Pontos Turísticos</a>
+        {% if is_authenticated %}
+          <a href="{{ url_for('admin') }}" class="btn btn-secondary btn-lg">Gerenciar Vitrine (Painel)</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="btn btn-outline btn-lg">Acesso Administrativo</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-card">
+        <span class="stat-number">40 km</span>
+        <span class="stat-label">De praias urbanas e litorâneas</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">28°C</span>
+        <span class="stat-label">Média das águas cristalinas</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">{{ total_spots }}</span>
+        <span class="stat-label">Pontos em destaque hoje</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Barra de Filtros e Categorias -->
+<section id="pontos" class="section-container">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Vitrine de Pontos Turísticos</h2>
+        <p class="section-subtitle">
+          Exibindo os destinos selecionados pela curadoria da Secretaria de Turismo.
+        </p>
+      </div>
+      
+      <!-- Filtro por Categoria -->
+      <div class="filter-group">
+        <a href="{{ url_for('home', _anchor='pontos') }}" class="filter-chip {% if not selected_category %}active{% endif %}">
+          Todos ({{ total_spots }})
+        </a>
+        {% for cat in categories %}
+          <a href="{{ url_for('home', category=cat, _anchor='pontos') }}" class="filter-chip {% if selected_category == cat %}active{% endif %}">
+            {{ cat }}
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Grid de Cards dos Pontos Turísticos -->
+    {% if spots %}
+      <div class="spots-grid">
+        {% for spot in spots %}
+          <article class="spot-card">
+            <div class="spot-media">
+              <img src="{{ spot['image_url'] }}" alt="{{ spot['title'] }}" loading="lazy" class="spot-image">
+              <span class="spot-category-tag">{{ spot['category'] }}</span>
+            </div>
+            <div class="spot-body">
+              <div class="spot-location">
+                <span class="location-icon">📍</span>
+                <span>{{ spot['location'] }}</span>
+              </div>
+              <h3 class="spot-title">{{ spot['title'] }}</h3>
+              <p class="spot-desc">{{ spot['description'] }}</p>
+            </div>
+            <div class="spot-footer">
+              <span class="source-credit" title="Órgão ou fonte de validação dos dados">
+                <span class="source-icon">🏛️</span> 
+                <span>Fonte: {{ spot['source_credit'] }}</span>
+              </span>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">🏖️</div>
+        <h3>Nenhum ponto turístico visível no momento</h3>
+        <p>Acesse o painel administrativo para ativar e selecionar quais pontos turísticos devem ser destacados na Home.</p>
+        {% if not is_authenticated %}
+          <a href="{{ url_for('login') }}" class="btn btn-primary">Fazer Login para Gerenciar</a>
+        {% else %}
+          <a href="{{ url_for('admin') }}" class="btn btn-primary">Ir para o Painel</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <!-- Banner Informativo para Área de Administração -->
+    <div class="admin-callout">
+      <div class="admin-callout-text">
+        <h4>É o gestor ou curador deste portal?</h4>
+        <p>Acesse o painel restrito para ativar, desativar ou reorganizar a vitrine de atrações exibidas aos visitantes.</p>
+      </div>
+      <div class="admin-callout-action">
+        {% if is_authenticated %}
+          <a href="{{ url_for('admin') }}" class="btn btn-secondary">Abrir Painel de Controle &rarr;</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="btn btn-primary">Entrar no Painel &rarr;</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
