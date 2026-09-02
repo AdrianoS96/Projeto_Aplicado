@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Área Administrativa | Curadoria Maceió Turismo{% endblock %}
+
+{% block content %}
+<section class="admin-section">
+  <div class="container">
+    <!-- Cabeçalho do Painel -->
+    <div class="admin-dashboard-header">
+      <div>
+        <div class="admin-title-badge">🔐 Ambiente Autenticado</div>
+        <h1 class="admin-title">Painel de Gestão da Vitrine Turística</h1>
+        <p class="admin-subtitle">
+          Selecione quais pontos turísticos de Maceió devem ser exibidos na página inicial (Home).
+        </p>
+      </div>
+
+      <!-- Ações Rápidas & Botão de Logout Funcional -->
+      <div class="admin-header-actions">
+        <a href="{{ url_for('home') }}" target="_blank" class="btn btn-outline">
+          <span>Ver Vitrine Pública</span> 🌐
+        </a>
+        
+        <!-- Formulário Seguro de Logout com CSRF -->
+        <form action="{{ url_for('logout') }}" method="POST" class="inline-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit" class="btn btn-danger">
+            <span>Encerrar Sessão (Logout)</span> 🚪
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Indicadores / Métricas do Sistema -->
+    <div class="metrics-grid">
+      <div class="metric-card metric-primary">
+        <span class="metric-number">{{ spots|length }}</span>
+        <span class="metric-label">Total Cadastrado</span>
+      </div>
+      <div class="metric-card metric-success">
+        <span class="metric-number">{{ active_count }}</span>
+        <span class="metric-label">Ativos na Home</span>
+      </div>
+      <div class="metric-card metric-muted">
+        <span class="metric-number">{{ inactive_count }}</span>
+        <span class="metric-label">Ocultos / Inativos</span>
+      </div>
+      <div class="metric-card metric-security">
+        <span class="metric-icon">🛡️</span>
+        <span class="metric-label">Controle de Acesso: <strong>Ativo (A01)</strong></span>
+      </div>
+    </div>
+
+    <!-- Tabela / Lista de Gestão dos Pontos Turísticos -->
+    <div class="admin-table-container">
+      <div class="table-header-bar">
+        <h3>Pontos Turísticos de Maceió</h3>
+        <span class="table-hint">Clique no botão para alternar entre "Exibir na Home" e "Ocultar"</span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th style="width: 80px;">Prévia</th>
+              <th>Ponto Turístico & Categoria</th>
+              <th>Localização</th>
+              <th>Fonte Confiável</th>
+              <th style="width: 140px; text-align: center;">Status na Home</th>
+              <th style="width: 180px; text-align: right;">Ação de Curadoria</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for spot in spots %}
+              <tr class="{% if spot['is_active'] == 0 %}row-inactive{% endif %}">
+                <td>
+                  <img src="{{ spot['image_url'] }}" alt="{{ spot['title'] }}" class="table-thumb">
+                </td>
+                <td>
+                  <div class="spot-table-title">{{ spot['title'] }}</div>
+                  <span class="badge-cat">{{ spot['category'] }}</span>
+                </td>
+                <td>
+                  <span class="location-text">📍 {{ spot['location'] }}</span>
+                </td>
+                <td>
+                  <span class="source-tag">🏛️ {{ spot['source_credit'] }}</span>
+                </td>
+                <td style="text-align: center;">
+                  {% if spot['is_active'] == 1 %}
+                    <span class="status-badge status-active">
+                      <span class="status-dot"></span> Visível
+                    </span>
+                  {% else %}
+                    <span class="status-badge status-inactive">
+                      <span class="status-dot"></span> Oculto
+                    </span>
+                  {% endif %}
+                </td>
+                <td style="text-align: right;">
+                  <form action="{{ url_for('toggle_spot', spot_id=spot['id']) }}" method="POST" class="inline-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    {% if spot['is_active'] == 1 %}
+                      <button type="submit" class="btn btn-sm btn-outline-warning" title="Desativar da Home">
+                        <span>Ocultar da Home</span> 👁️‍🗨️
+                      </button>
+                    {% else %}
+                      <button type="submit" class="btn btn-sm btn-success" title="Ativar para exibição na Home">
+                        <span>Mostrar na Home</span> ✨
+                      </button>
+                    {% endif %}
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

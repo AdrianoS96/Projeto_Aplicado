@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}{{ code }} - {{ title }} | Maceió Turismo{% endblock %}
+
+{% block content %}
+<div class="container error-container">
+  <div class="error-card">
+    <div class="error-code">{{ code }}</div>
+    <h2 class="error-title">{{ title }}</h2>
+    <p class="error-desc">{{ description }}</p>
+    <div class="error-actions">
+      <a href="{{ url_for('home') }}" class="btn btn-primary">Voltar para a Página Inicial</a>
+      {% if code == 401 or code == 403 %}
+        <a href="{{ url_for('login') }}" class="btn btn-outline">Ir para Tela de Login</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
