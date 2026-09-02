@@ -17,8 +17,6 @@
         <a href="#pontos" class="btn btn-primary btn-lg">Explorar Pontos Turísticos</a>
         {% if is_authenticated %}
           <a href="{{ url_for('admin') }}" class="btn btn-secondary btn-lg">Gerenciar Vitrine (Painel)</a>
-        {% else %}
-          <a href="{{ url_for('login') }}" class="btn btn-outline btn-lg">Acesso Administrativo</a>
         {% endif %}
       </div>
     </div>
@@ -93,29 +91,12 @@
       <div class="empty-state">
         <div class="empty-icon">🏖️</div>
         <h3>Nenhum ponto turístico visível no momento</h3>
-        <p>Acesse o painel administrativo para ativar e selecionar quais pontos turísticos devem ser destacados na Home.</p>
-        {% if not is_authenticated %}
-          <a href="{{ url_for('login') }}" class="btn btn-primary">Fazer Login para Gerenciar</a>
-        {% else %}
+        <p>Acesse a área administrativa pelo botão na parte superior para ativar e selecionar os pontos turísticos da Home.</p>
+        {% if is_authenticated %}
           <a href="{{ url_for('admin') }}" class="btn btn-primary">Ir para o Painel</a>
         {% endif %}
       </div>
     {% endif %}
-
-    <!-- Banner Informativo para Área de Administração -->
-    <div class="admin-callout">
-      <div class="admin-callout-text">
-        <h4>É o gestor ou curador deste portal?</h4>
-        <p>Acesse o painel restrito para ativar, desativar ou reorganizar a vitrine de atrações exibidas aos visitantes.</p>
-      </div>
-      <div class="admin-callout-action">
-        {% if is_authenticated %}
-          <a href="{{ url_for('admin') }}" class="btn btn-secondary">Abrir Painel de Controle &rarr;</a>
-        {% else %}
-          <a href="{{ url_for('login') }}" class="btn btn-primary">Entrar no Painel &rarr;</a>
-        {% endif %}
-      </div>
-    </div>
   </div>
 </section>
 {% endblock %}

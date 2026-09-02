@@ -10,9 +10,6 @@
     <p class="error-desc">{{ description }}</p>
     <div class="error-actions">
       <a href="{{ url_for('home') }}" class="btn btn-primary">Voltar para a Página Inicial</a>
-      {% if code == 401 or code == 403 %}
-        <a href="{{ url_for('login') }}" class="btn btn-outline">Ir para Tela de Login</a>
-      {% endif %}
     </div>
   </div>
 </div>
