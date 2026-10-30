@@ -5,6 +5,8 @@ e cria o usuário administrador inicial com senha protegida por hash criptográf
 (OWASP A07:2025 - Identification and Authentication Failures).
 """
 
+import os
+import secrets
 from typing import Optional
 from werkzeug.security import generate_password_hash
 from config import Config
@@ -138,13 +140,21 @@ def seed_database(db_path: Optional[str] = None) -> None:
     """
     init_db(db_path)
     
-    # 1. Criação do Usuário Administrador com Senha Hashed (OWASP A07)
+    # 1. Criação do Usuário Administrador com Senha Hashed (OWASP A07 / CWE-798)
     admin_user = Config.DEFAULT_ADMIN_USER
     existing_user = get_user_by_username(admin_user, db_path)
     if not existing_user:
+        admin_pass = Config.DEFAULT_ADMIN_PASS or os.environ.get("DEFAULT_ADMIN_PASS")
+        if not admin_pass:
+            import secrets
+            admin_pass = secrets.token_urlsafe(16)
+            print(f"[SEED] ⚠️ Variável DEFAULT_ADMIN_PASS não informada no ambiente.")
+            print(f"[SEED] 🔑 Senha administrativa temporária gerada para '{admin_user}': {admin_pass}")
+            Config.DEFAULT_ADMIN_PASS = admin_pass
+
         # Hashing forte com sal automático (PBKDF2/scrypt via werkzeug)
         hashed_password = generate_password_hash(
-            Config.DEFAULT_ADMIN_PASS,
+            admin_pass,
             method="scrypt"
         )
         create_user(

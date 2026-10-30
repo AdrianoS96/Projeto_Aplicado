@@ -3,11 +3,12 @@
 > **Projeto Aplicado: Práticas de Mercado**  
 > Aplicação Web para Divulgação e Gestão dos Pontos Turísticos de Maceió/AL, desenvolvida sob os preceitos de **Secure by Design** e mitigação ativa do **OWASP Top 10:2025**.
 
+[![CI/CD Pipeline](https://github.com/AdrianoS96/Projeto_Aplicado/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/AdrianoS96/Projeto_Aplicado/actions/workflows/ci-cd.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Framework Flask](https://img.shields.io/badge/framework-Flask_3.1-teal.svg)](https://flask.palletsprojects.com/)
 [![Security OWASP 2025](https://img.shields.io/badge/security-OWASP_Top_10:2025-green.svg)](https://owasp.org/Top10/2025/)
 [![Database SQLite](https://img.shields.io/badge/database-SQLite_Ready-lightgrey.svg)](https://www.sqlite.org/)
-[![Tests Pytest](https://img.shields.io/badge/tests-15_passed-success.svg)](https://pytest.org/)
+[![Tests Pytest](https://img.shields.io/badge/tests-19_passed-success.svg)](https://pytest.org/)
 
 ---
 
@@ -157,17 +158,25 @@ Projeto_Aplicado/
 
 ---
 
-## 🔑 5. Credenciais Padrão de Avaliação
+## 🔑 5. Gerenciamento Seguro de Credenciais Administrativas
 
-Para testar a área administrativa e a funcionalidade de curadoria dos pontos turísticos:
+Em estrita conformidade com as boas práticas de **Prevenção de Vazamento de Dados** e **Secure by Design (OWASP A07 / CWE-798 - Proibição de Senhas Hardcoded)**, o repositório **não possui credenciais fixadas no código-fonte nem versiona arquivos `.env`**.
 
-| Campo | Valor Padrão |
-| :--- | :--- |
-| **URL de Login** | `http://127.0.0.1:5000/login` |
-| **Usuário** | `admin` |
-| **Senha** | `DefinaSuaSenhaSegura2025!` |
-
-> *Nota: A senha é convertida em hash seguro (`scrypt`) antes de qualquer armazenamento no banco de dados.*
+### Como configurar o acesso administrativo:
+1. **Copie o arquivo de exemplo de ambiente**:
+   ```bash
+   cp .env.example .env
+   ```
+2. **Defina a senha no seu `.env` local** (arquivo protegido no `.gitignore`):
+   ```env
+   DEFAULT_ADMIN_USER=admin
+   DEFAULT_ADMIN_PASS=DefinaSuaSenhaSegura2025!
+   ```
+3. **Inicialize o banco de dados**:
+   ```bash
+   python seed_data.py
+   ```
+   > **Geração Dinâmica de Senha (Fallback Seguro):** Caso execute o `seed_data.py` sem configurar a variável `DEFAULT_ADMIN_PASS`, o sistema gera dinamicamente uma senha forte em runtime e a exibe no console para o operador, garantindo que o código permaneça 100% livre de senhas hardcoded. Todas as senhas são armazenadas exclusivamente sob hash criptográfico irreversível (`scrypt`).
 
 ---
 
@@ -230,3 +239,55 @@ O projeto adota o fluxo de trabalho moderno baseado em branches de funcionalidad
   - `test: ...` para suíte de testes automatizados;
   - `docs: ...` para documentações e guias;
   - `chore: ...` para configurações e dependências.
+
+---
+
+## 🔄 9. Esteira de CI/CD no GitHub Actions
+
+O repositório conta com uma esteira profissional de **Integração e Entrega/Implantação Contínua (CI/CD)** implementada via **GitHub Actions** ([`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml)).
+
+```mermaid
+flowchart LR
+    A[Merge para main] --> B[CI: Lint & Sintaxe]
+    A --> C[CI: Auditoria OWASP / SAST]
+    A --> D[CI: Pytest Matriz Python 3.10-3.12]
+    B & C & D --> E[CD: Empacotamento de Release SHA-256]
+    E --> F[CD: Deploy SSH na VM Oracle Cloud]
+```
+
+### 🎯 Gatilhos de Execução:
+- **Merge ou Push na branch `main`**: Disparo completo da esteira (todas as etapas de **CI** + **CD Build/Package** + **CD Deploy**).
+- **Pull Requests para a `main`**: Execução preventiva das etapas de **CI** (Lint, Segurança e Testes) para garantir que apenas código aprovado seja mesclado.
+- **Workflow Dispatch**: Permite disparar o fluxo manualmente com um clique na aba *Actions* do GitHub.
+
+### 🛠️ Estágios Automatizados:
+1. **🔍 Lint & Syntax Validation**:
+   - Compilação sintática com `compileall`.
+   - Inspeção estática rigorosa via `flake8` contra erros de sintaxe (E9) e variáveis indefinidas (F63, F7, F82).
+2. **🛡️ Security Audit (OWASP Top 10 / SAST)**:
+   - Análise SAST com **Bandit**, validando conformidade com as diretrizes do OWASP Top 10.
+   - Auditoria de segurança de dependências com **pip-audit** contra bancos públicos de vulnerabilidades (CVEs).
+3. **🧪 Testes Automatizados em Matriz Multi-Versão**:
+   - Execução dos 19 testes automatizados com `pytest` em ambiente isolado nas versões **Python 3.10, 3.11 e 3.12**.
+   - Publicação de relatórios de teste em formato JUnit XML.
+4. **📦 Empacotamento de Artefato de Produção (CD)**:
+   - Executado exclusivamente após o merge na `main`.
+   - Gera o arquivo `.tar.gz` contendo somente os arquivos de produção (eliminando testes, caches e ambientes virtuais).
+   - Calcula o hash criptográfico **SHA-256** para verificação de integridade e anexa o artefato ao GitHub Actions com retenção de 30 dias.
+5. **🚀 Deploy Contínuo na VM Oracle Cloud (CD)**:
+   - Aciona o script defensivo e idempotente [`scripts/deploy.sh`](scripts/deploy.sh) no servidor de produção via conexão SSH segura.
+   - Atualiza o código na branch `main`, sincroniza dependências no venv, valida o banco e recarrega o serviço gerenciado pelo [`deploy/maceio-turismo.service`](deploy/maceio-turismo.service).
+
+### 🔐 Configuração de Secrets no GitHub (Para Deploy Automatizado):
+Para habilitar o deploy automático direto na sua VM Oracle Cloud (ou em qualquer servidor Linux), cadastre as seguintes variáveis em **Settings** ➔ **Secrets and variables** ➔ **Actions** ➔ **Repository secrets**:
+
+| Secret | Descrição | Exemplo |
+| :--- | :--- | :--- |
+| `VM_HOST` | IP público ou domínio da máquina virtual | `129.148.xx.xx` |
+| `VM_USER` | Usuário de acesso SSH na VM | `ubuntu` |
+| `VM_SSH_KEY` | Conteúdo da chave privada SSH autorizada | `-----BEGIN OPENSSH PRIVATE KEY----- ...` |
+| `VM_SSH_PORT` | Porta SSH da VM (opcional, padrão 22) | `22` |
+| `VM_APP_DIR` | Diretório raiz do projeto na VM (opcional) | `/home/ubuntu/Projeto_Aplicado` |
+
+> *Nota: Se as Secrets ainda não tiverem sido configuradas no repositório, a pipeline executará todas as etapas de CI e empacotamento com sucesso, emitindo um aviso amigável de orientação no log do deploy sem causar falha no workflow.*
+
