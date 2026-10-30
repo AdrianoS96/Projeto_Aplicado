@@ -1,0 +1,24 @@
+[Unit]
+Description=Portal Maceio Turismo - Gunicorn Service
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/Projeto_Aplicado
+Environment="PATH=/home/ubuntu/Projeto_Aplicado/.venv/bin:/usr/bin:/bin"
+Environment="FLASK_ENV=production"
+Environment="SESSION_COOKIE_SECURE=true"
+ExecStart=/home/ubuntu/Projeto_Aplicado/.venv/bin/gunicorn --workers 2 --bind 127.0.0.1:5000 --access-logfile - --error-logfile - app:app
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=5
+
+# Mitigações de Hardening do Processo (OWASP / System Security)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target
