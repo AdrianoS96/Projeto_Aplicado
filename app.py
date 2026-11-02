@@ -10,6 +10,7 @@ Implementa mitigações ativas para o OWASP Top 10:2025:
 
 import time
 import secrets
+from urllib.parse import urlsplit
 from functools import wraps
 from typing import Dict, List, Tuple
 from flask import (
@@ -26,6 +27,9 @@ from flask import (
 )
 from werkzeug.security import check_password_hash
 from config import Config
+
+# Hash dummy pré-computado (scrypt) para mitigar ataques de temporização na enumeração de usuários (OWASP A07 / CWE-208)
+_DUMMY_PASSWORD_HASH = "scrypt:32768:8:1$R6hafj7noPIGT6Fp$dac406e6c6563456950d51db81fe821ce19f9d1bf467a106d8440db7e634f5594f8fe6177e38a06315d50b75020949a4634cc0a905b8e4d160df23de0321e566"
 from database import (
     get_active_tourist_spots,
     get_all_tourist_spots,
@@ -48,15 +52,28 @@ def is_rate_limited(client_ip: str) -> Tuple[bool, int]:
     """
     Verifica se o endereço IP excedeu o número máximo de tentativas de login.
     Retorna (True, tempo_restante_segundos) se bloqueado, ou (False, 0).
+    Aplica purga periódica preventiva contra esgotamento de memória (DoS / CWE-400).
     """
     now = time.time()
     window = Config.LOGIN_ATTEMPT_WINDOW_SECONDS
     max_attempts = Config.MAX_LOGIN_ATTEMPTS
     
+    # Controle preventivo de uso de memória: remove entradas expiradas se o volume de IPs for alto
+    if len(_login_attempts) > getattr(Config, "MAX_TRACKED_IPS", 10000):
+        expired_ips = [
+            ip for ip, timestamps in _login_attempts.items()
+            if not timestamps or (now - timestamps[-1] >= window)
+        ]
+        for ip in expired_ips:
+            _login_attempts.pop(ip, None)
+    
     attempts = _login_attempts.get(client_ip, [])
     # Filtra apenas tentativas dentro da janela recente
     valid_attempts = [t for t in attempts if now - t < window]
-    _login_attempts[client_ip] = valid_attempts
+    if valid_attempts:
+        _login_attempts[client_ip] = valid_attempts
+    elif client_ip in _login_attempts:
+        del _login_attempts[client_ip]
     
     if len(valid_attempts) >= max_attempts:
         oldest_attempt = valid_attempts[0]
@@ -127,6 +144,14 @@ def set_security_headers(response: Response) -> Response:
     # Restringe o acesso a recursos do dispositivo (câmera, microfone, geolocalização)
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     
+    # Restringe compartilhamento de contexto de janela (COOP) e isolamento de recursos (CORP)
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
+    
+    # Ativa HSTS em HTTPS ou ambiente de produção
+    if request.is_secure or app.config.get("SESSION_COOKIE_SECURE"):
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+
     # Content Security Policy (CSP): Mitiga XSS restringindo a origem de scripts e recursos
     csp_directives = [
         "default-src 'self'",
@@ -230,8 +255,12 @@ def login():
             
         user = get_user_by_username(username, get_db_path())
         
-        # OWASP A07: Comparação com hash seguro e mensagem genérica contra enumeração
-        if user and check_password_hash(user["password_hash"], password):
+        # OWASP A07 / CWE-208: Equalização de tempo contra enumeração (Timing Attack)
+        # Sempre executa check_password_hash com custo criptográfico constante
+        target_hash = user["password_hash"] if user else _DUMMY_PASSWORD_HASH
+        password_valid = check_password_hash(target_hash, password)
+        
+        if user and password_valid:
             # Prevenção contra Session Fixation: Limpa e regenera a sessão
             session.clear()
             session["user_id"] = user["id"]
@@ -245,10 +274,13 @@ def login():
             
             flash(f"Bem-vindo(a), {user['username']}! Acesso administrativo concedido.", "success")
             
-            # Validação da URL de redirecionamento (Open Redirect Prevention)
+            # Validação estrita da URL de redirecionamento (Open Redirect Prevention - CWE-601)
             next_url = request.args.get("next")
-            if next_url and next_url.startswith("/"):
-                return redirect(next_url)
+            if next_url:
+                parsed = urlsplit(next_url)
+                # Rejeita hosts externos, esquemas (ex: javascript:) e caminhos relativos de protocolo (//)
+                if not parsed.netloc and not parsed.scheme and next_url.startswith("/") and not next_url.startswith("//") and not next_url.startswith("/\\"):
+                    return redirect(next_url)
             return redirect(url_for("admin"))
         else:
             record_failed_attempt(client_ip)
@@ -258,10 +290,12 @@ def login():
             
     return render_template("login.html")
 
-@app.route("/logout", methods=["GET", "POST"])
+@app.route("/logout", methods=["POST"])
+@login_required
 def logout():
     """
     Encerra a sessão do usuário de forma segura, invalidando cookies e dados em memória.
+    OWASP A08 / CWE-352: Restrito a POST com validação de token CSRF no middleware.
     """
     session.clear()
     flash("Sessão encerrada com sucesso.", "info")

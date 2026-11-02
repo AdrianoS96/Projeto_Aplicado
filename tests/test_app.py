@@ -15,6 +15,10 @@ from seed_data import seed_database
 @pytest.fixture
 def client():
     """Configura o cliente de testes com um banco de dados SQLite isolado e temporário."""
+    # Garante credencial de teste dinâmica na suíte de testes
+    if not Config.DEFAULT_ADMIN_PASS:
+        Config.DEFAULT_ADMIN_PASS = "TestSecurePassword#2025"
+
     db_fd, db_path = tempfile.mkstemp(suffix=".db")
     app.config["DATABASE_PATH"] = db_path
     app.config["TESTING"] = True
@@ -317,5 +321,78 @@ def test_security_headers_present_in_responses(client):
     assert response.headers.get("X-Frame-Options") == "DENY"
     assert response.headers.get("X-Content-Type-Options") == "nosniff"
     assert response.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
+    assert response.headers.get("Cross-Origin-Opener-Policy") == "same-origin"
+    assert response.headers.get("Cross-Origin-Resource-Policy") == "same-origin"
     assert "Content-Security-Policy" in response.headers
     assert "default-src 'self'" in response.headers.get("Content-Security-Policy")
+
+# ======================================================================
+# 7. Testes das Mitigações Adicionais de Segurança (Hardening Audit)
+# ======================================================================
+
+def test_open_redirect_attempts_blocked(client):
+    """
+    OWASP A01 / CWE-601: Tentativas de redirecionamento aberto no parâmetro 'next'
+    devem ser neutralizadas, direcionando sempre para /admin por segurança.
+    """
+    csrf_token = get_csrf_token(client)
+    malicious_next_urls = [
+        "//attacker.com",
+        "//attacker.com/phishing",
+        "/\\attacker.com",
+        "https://attacker.com",
+        "javascript:alert(1)",
+    ]
+
+    for malicious_url in malicious_next_urls:
+        csrf_token = get_csrf_token(client)
+        res = client.post(
+            f"/login?next={malicious_url}",
+            data={
+                "csrf_token": csrf_token,
+                "username": Config.DEFAULT_ADMIN_USER,
+                "password": Config.DEFAULT_ADMIN_PASS,
+            },
+            follow_redirects=False,
+        )
+        assert res.status_code == 302
+        assert res.headers["Location"] == "/admin", f"Open redirect não foi bloqueado para {malicious_url}"
+        with client.session_transaction() as sess:
+            sess.clear()
+
+
+def test_open_redirect_valid_relative_url_allowed(client):
+    """
+    Garante que caminhos relativos legítimos continuam sendo respeitados no 'next'.
+    """
+    csrf_token = get_csrf_token(client)
+    res = client.post(
+        "/login?next=/admin",
+        data={
+            "csrf_token": csrf_token,
+            "username": Config.DEFAULT_ADMIN_USER,
+            "password": Config.DEFAULT_ADMIN_PASS,
+        },
+        follow_redirects=False,
+    )
+    assert res.status_code == 302
+    assert res.headers["Location"] == "/admin"
+
+
+def test_logout_get_rejected_with_405(client):
+    """
+    OWASP A08 / CWE-352: Requisição GET em /logout deve ser rejeitada com 405 Method Not Allowed,
+    impedindo ataques de CSRF de desconexão forçada via tags <img> ou links externos.
+    """
+    res = client.get("/logout")
+    assert res.status_code == 405
+
+
+def test_max_content_length_is_configured():
+    """
+    OWASP A05 / CWE-400: Garante que a aplicação possui limite de tamanho de payload definido.
+    """
+    assert hasattr(Config, "MAX_CONTENT_LENGTH")
+    assert Config.MAX_CONTENT_LENGTH > 0
+    assert Config.MAX_CONTENT_LENGTH <= 10 * 1024 * 1024  # Máximo razoável de 10 MB
+
