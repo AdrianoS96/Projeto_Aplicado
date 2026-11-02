@@ -57,19 +57,6 @@
       </div>
     </form>
 
-    <!-- Caixa Informativa de Defesas Ativas (Secure by Design) -->
-    <div class="security-info-box">
-      <div class="security-info-header">
-        <span class="shield-mini">🛡️</span>
-        <strong>Proteções Ativas nesta Tela:</strong>
-      </div>
-      <ul class="security-checklist">
-        <li><strong>OWASP A01</strong>: Sessão isolada e protegida no servidor.</li>
-        <li><strong>OWASP A03</strong>: Consultas SQL 100% parametrizadas (Prepared Statements).</li>
-        <li><strong>OWASP A07</strong>: Senha armazenada com hash criptográfico (scrypt) e proteção de taxa (Rate Limiting) contra força bruta.</li>
-        <li><strong>Anti-CSRF</strong>: Validação estrita de token de sessão em cada requisição POST.</li>
-      </ul>
-    </div>
   </div>
 </div>
 {% endblock %}

@@ -18,7 +18,8 @@ RestartSec=5
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full
-ProtectHome=read-only
+ProtectHome=false
+ReadWritePaths=/home/ubuntu/Projeto_Aplicado
 
 [Install]
 WantedBy=multi-user.target

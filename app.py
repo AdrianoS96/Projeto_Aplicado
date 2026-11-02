@@ -366,6 +366,7 @@ def too_many_requests(error):
 
 @app.errorhandler(500)
 def internal_error(error):
+    app.logger.error(f"Erro 500 inesperado: {error}", exc_info=True)
     return render_template("error.html", code=500, title="Erro Interno", description="Ocorreu um erro inesperado no servidor."), 500
 
 # ----------------------------------------------------------------------
