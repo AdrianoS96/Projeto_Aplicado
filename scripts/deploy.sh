@@ -46,9 +46,18 @@ pip install -r requirements.txt gunicorn
 # 5. Executar inicialização do banco de dados e seed seguro se necessário
 echo "🗄️ 4/5 Validando banco de dados e dados cadastrais..."
 python seed_data.py
+if [ -f "maceio_turismo.db" ]; then
+    chmod 664 maceio_turismo.db || true
+fi
 
-# 6. Reiniciar o serviço da aplicação
+# 6. Atualizar arquivo de serviço systemd se disponível e reiniciar aplicação
 echo "🔄 5/5 Reiniciando serviço da aplicação..."
+if [ -f "deploy/maceio-turismo.service" ] && [ -d "/etc/systemd/system" ]; then
+    if sudo cp deploy/maceio-turismo.service /etc/systemd/system/maceio-turismo.service 2>/dev/null; then
+        sudo systemctl daemon-reload 2>/dev/null || true
+    fi
+fi
+
 if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet "${SERVICE_NAME}"; then
     echo "Reiniciando serviço systemd: ${SERVICE_NAME}..."
     sudo systemctl restart "${SERVICE_NAME}"
