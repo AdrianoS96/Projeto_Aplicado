@@ -177,6 +177,8 @@ jobs:
     needs: [build-and-package]
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
+    environment:
+      name: production
     steps:
       - name: 📥 Clonar repositório
         uses: actions/checkout@v4
@@ -187,14 +189,27 @@ jobs:
           VM_HOST: ${{ secrets.VM_HOST }}
           VM_SSH_KEY: ${{ secrets.VM_SSH_KEY }}
         run: |
-          if [ -n "$VM_HOST" ] && [ -n "$VM_SSH_KEY" ]; then
-            echo "has_secrets=true" >> "$GITHUB_OUTPUT"
-            echo "✅ Credenciais de SSH encontradas no GitHub Secrets."
-            FIRST_LINE=$(printf "%s" "${{ secrets.VM_SSH_KEY }}" | head -n 1)
-            LAST_LINE=$(printf "%s" "${{ secrets.VM_SSH_KEY }}" | tail -n 1)
+          echo "=== DIAGNÓSTICO DE CREDENCIAIS ==="
+          if [ -z "$VM_HOST" ]; then
+            echo "❌ VM_HOST está VAZIA!"
+          else
+            echo "✅ VM_HOST está preenchida."
+          fi
+
+          if [ -z "$VM_SSH_KEY" ]; then
+            echo "❌ VM_SSH_KEY está VAZIA!"
+          else
+            echo "✅ VM_SSH_KEY está preenchida."
+            FIRST_LINE=$(printf "%s" "$VM_SSH_KEY" | head -n 1)
+            LAST_LINE=$(printf "%s" "$VM_SSH_KEY" | tail -n 1)
             echo "📋 Formato da chave detectado:"
             echo "   Primeira linha: $FIRST_LINE"
             echo "   Última linha:   $LAST_LINE"
+          fi
+
+          if [ -n "$VM_HOST" ] && [ -n "$VM_SSH_KEY" ]; then
+            echo "has_secrets=true" >> "$GITHUB_OUTPUT"
+            echo "🚀 Credenciais válidas. Prosseguindo para o deploy..."
           else
             echo "has_secrets=false" >> "$GITHUB_OUTPUT"
             echo "⚠️ Credenciais de SSH não cadastradas em GitHub Secrets."
