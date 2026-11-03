@@ -185,8 +185,11 @@ jobs:
 
       - name: 🔍 Verificar credenciais de SSH para Deploy
         id: check-secrets
+        env:
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_SSH_KEY: ${{ secrets.VM_SSH_KEY }}
         run: |
-          if [ -n "${{ secrets.VM_HOST }}" ] && [ -n "${{ secrets.VM_SSH_KEY }}" ]; then
+          if [ -n "$VM_HOST" ] && [ -n "$VM_SSH_KEY" ]; then
             echo "has_secrets=true" >> "$GITHUB_OUTPUT"
             echo "✅ Credenciais de SSH encontradas no GitHub Secrets."
           else
