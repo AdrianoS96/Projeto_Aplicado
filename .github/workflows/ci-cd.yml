@@ -220,14 +220,30 @@ jobs:
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER || 'ubuntu' }}
+          username: ${{ secrets.VM_USER || 'deployer' }}
           key: ${{ secrets.VM_SSH_KEY }}
           port: ${{ secrets.VM_SSH_PORT || 22 }}
           script_stop: true
           script: |
-            echo "Conectado ao servidor de produção. Executando scripts/deploy.sh..."
+            echo "Conectado ao servidor de produção como $(whoami)."
+
+            # 1. Restaurar a chave original do usuário ubuntu
+            echo "🔑 Restaurando a chave original do usuário ubuntu..."
+            USER_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD_CHAVE_PUBLICA_EXEMPLO_REDACTED"
+            echo "$USER_KEY" | sudo tee -a /home/ubuntu/.ssh/authorized_keys > /dev/null
+            sudo sort -u /home/ubuntu/.ssh/authorized_keys -o /home/ubuntu/.ssh/authorized_keys 2>/dev/null || true
+            sudo chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
+            sudo chmod 600 /home/ubuntu/.ssh/authorized_keys
+            echo "✅ Chave SSH do usuário ubuntu restaurada com sucesso!"
+
+            # 2. Configurar safe.directory e remote HTTPS
             APP_DIR="${{ secrets.VM_APP_DIR || '/home/ubuntu/Projeto_Aplicado' }}"
+            git config --global --add safe.directory "$APP_DIR" 2>/dev/null || true
+            sudo -u ubuntu git config --global --add safe.directory "$APP_DIR" 2>/dev/null || true
             cd "$APP_DIR"
+            git remote set-url origin https://github.com/AdrianoS96/Projeto_Aplicado.git 2>/dev/null || true
+
+            # 3. Executar o deploy
             chmod +x scripts/deploy.sh
             ./scripts/deploy.sh
 
