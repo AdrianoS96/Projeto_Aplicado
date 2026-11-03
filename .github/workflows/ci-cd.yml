@@ -135,7 +135,7 @@ jobs:
   build-and-package:
     name: 📦 Empacotamento de Artefato (Release)
     needs: [lint-and-syntax, security-audit, test]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Clonar repositório
@@ -175,7 +175,7 @@ jobs:
   deploy:
     name: 🚀 Deploy Contínuo (Produção)
     needs: [build-and-package]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     environment:
       name: production
