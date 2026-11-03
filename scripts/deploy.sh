@@ -24,6 +24,8 @@ cd "${APP_DIR}"
 
 # 2. Atualizar código a partir da branch principal
 echo "📥 1/5 Atualizando repositório a partir da branch 'main'..."
+git config --global --add safe.directory "${APP_DIR}" 2>/dev/null || true
+git remote set-url origin https://github.com/AdrianoS96/Projeto_Aplicado.git 2>/dev/null || true
 git fetch origin main
 git reset --hard origin/main
 
